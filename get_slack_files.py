@@ -14,6 +14,8 @@ while flag == 1:
         root.withdraw()
         root.attributes('-topmost', 1)
         file_path = filedialog.askopenfilename()
+        if not file_path:
+            exit(0)
         flag = 0
 
 
@@ -23,41 +25,47 @@ try:
 except Exception:
     print("An error has occurred, verify that the path exists or that the file extension is parsable.")
     exit(1)
-    
-url_list = re.findall(r'''https?:[\\/]+?[^"]+''', url_file)
-extension_list = re.findall(r'''\.(m4a|png|xlsx|txt|tif|jpg|gif|pdf|doc|zip|ppt)''', url_file)
-#extension_list = re.findall(r'''\.\w{4}''', url_file)
-print(set(extension_list))
 
+
+url_list = (re.findall(r'''https?:[\\/]+.+/download.+\..+\?[^"]+''', url_file))
+for i in range(len(url_list)):
+    url_list[i] = url_list[i].replace("\\", "")
+print(len(url_list))
+
+filename_list = re.findall(r'''/download.+\..+\?''', url_file)
+for i in range(len(filename_list)):
+    filename_list[i] = filename_list[i].replace("/download\\/", "")
+    filename_list[i] = filename_list[i].replace("?", "")
+print(len(filename_list))
+
+for i in range(len(filename_list)):
+    if filename_list[i] not in url_list[i]:
+        print("WRONG")
 
 print("Where do you want to save your %d files ?" % len(url_list))
-save_file_path = os.path.abspath(filedialog.askdirectory())
+save_file_path = filedialog.askdirectory()
+save_file_path_abs = os.path.abspath(save_file_path)
+if not save_file_path:
+    exit(0)
 
-# try:
-#      os.mkdir(save_file_path+"\slack_files")
-#      print("Creating the folder 'slack_files' in %s." % save_file_path)
-# except FileExistsError:
-#      print("Your files will be added to the existing 'slack_files' folder.")
 
 nonTrouve = 0
-i = 1
 
-for eachUrl in url_list:
-    eachUrl = eachUrl.replace("\\", "")
-    print(str(i)+'/'+str(len(url_list)))
+for i in range(len(url_list)):
+    print(str(i+1)+'/'+str(len(url_list)))
 
     try:
-        request = urllib.request.Request(eachUrl)
+        request = urllib.request.Request(url_list[i])
         response = urllib.request.urlopen(request)
         file = response.read()
     except urllib.error.HTTPError:
         nonTrouve += nonTrouve
+        print("ERROR FILE NOT FOUND")
         continue
 
-    output = open(os.path.join(save_file_path, "file%d.%s" % (i, extension_list[i-1])), "wb")
+    output = open(os.path.join(save_file_path_abs, "%s" % (filename_list[i])), "wb")
     output.write(file)
     output.close()
-    i += 1
 
 print("%d files couldn't be found" % nonTrouve)
 print("%d files where saved" % (len(url_list)-nonTrouve))
