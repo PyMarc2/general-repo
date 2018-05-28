@@ -5,67 +5,100 @@ from tkinter import filedialog
 import urllib.request
 
 
-flag = 1
+class GetSlackFiles:
 
-while flag == 1:
-    confirm = input("Press <Enter> to select the file to parse")
-    if confirm == "":
-        root = tk.Tk()
-        root.withdraw()
-        root.attributes('-topmost', 1)
-        file_path = filedialog.askopenfilename()
-        if not file_path:
+    def __init__(self):
+        self.file_path = ""
+        self.save_file_path = ""
+        self.save_file_path_abs = ""
+
+        self.url_file = ""
+
+
+        self.url_list = []
+        self.filename_list = []
+        self.category_list = []
+        self.dates_list = []
+
+        self.non_trouve = 0
+        self.flag = 1
+        self.root = tk.Tk()
+
+    def selectFile2Parse(self):
+        while self.flag == 1:
+            self.confirm = input("Press <Enter> to select the file to parse")
+            if self.confirm == "":
+                self.root.withdraw()
+                self.root.attributes('-topmost', 1)
+                self.file_path = filedialog.askopenfilename()
+                if not self.file_path:
+                    exit(0)
+                self.flag = 0
+
+    def openFile2Parse(self):
+        try:
+            self.url_file = open(self.file_path, 'r')
+            self.url_file = self.url_file.read()
+        except Exception:
+            print("An error has occurred, verify that the path exists or that the file extension is parsable.")
+            exit(1)
+
+    def findURL(self):
+        self.url_list = (re.findall(r'''https?:[\\/]+.+/download.+\..+\?[^"]+''', self.url_file))
+        for i in range(len(self.url_list)):
+            self.url_list[i] = self.url_list[i].replace("\\", "")
+        print(len(self.url_list))
+
+    def findFilename(self):
+        self.filename_list = re.findall(r'''/download.+\..+\?''', self.url_file)
+        for i in range(len(self.filename_list)):
+            self.filename_list[i] = self.filename_list[i].replace("/download\\/", "")
+            self.filename_list[i] = self.filename_list[i].replace("?", "")
+        print(len(self.filename_list))
+
+    def findCategory(self):
+        pass
+
+    def findDates(self):
+        pass
+
+    def selectSaveFolder(self):
+        print("Where do you want to save your %d files ?" % len(self.url_list))
+        self.save_file_path = filedialog.askdirectory()
+        self.save_file_path_abs = os.path.abspath(self.save_file_path)
+        if not self.save_file_path:
             exit(0)
-        flag = 0
+
+    def saveAllFiles(self):
+        for i in range(len(self.url_list)):
+            print(str(i + 1) + '/' + str(len(self.url_list)), self.filename_list[i])
+
+            try:
+                request = urllib.request.Request(self.url_list[i])
+                response = urllib.request.urlopen(request)
+                file = response.read()
+            except urllib.error.HTTPError:
+                self.nonTrouve += self.nonTrouve
+                print("ERROR FILE NOT FOUND")
+                continue
+
+            output = open(os.path.join(self.save_file_path_abs, "%s" % (self.filename_list[i])), "wb")
+            output.write(file)
+            output.close()
+
+        print("%d files couldn't be found" % self.nonTrouve)
+        print("%d files were saved" % (len(self.url_list) - self.nonTrouve))
 
 
-try:
-    url_file = open(file_path, 'r')
-    url_file = url_file.read()
-except Exception:
-    print("An error has occurred, verify that the path exists or that the file extension is parsable.")
-    exit(1)
+BSFG = GetSlackFiles()  # BliqSlackFilesGetter
 
+BSFG.selectFile2Parse()
+BSFG.openFile2Parse()
 
-url_list = (re.findall(r'''https?:[\\/]+.+/download.+\..+\?[^"]+''', url_file))
-for i in range(len(url_list)):
-    url_list[i] = url_list[i].replace("\\", "")
-print(len(url_list))
+BSFG.findURL()
+BSFG.findFilename()
+BSFG.findCategory()
+BSFG.findDates()
 
-filename_list = re.findall(r'''/download.+\..+\?''', url_file)
-for i in range(len(filename_list)):
-    filename_list[i] = filename_list[i].replace("/download\\/", "")
-    filename_list[i] = filename_list[i].replace("?", "")
-print(len(filename_list))
-
-for i in range(len(filename_list)):
-    if filename_list[i] not in url_list[i]:
-        print("WRONG")
-
-print("Where do you want to save your %d files ?" % len(url_list))
-save_file_path = filedialog.askdirectory()
-save_file_path_abs = os.path.abspath(save_file_path)
-if not save_file_path:
-    exit(0)
-
-
-nonTrouve = 0
-
-for i in range(len(url_list)):
-    print(str(i+1)+'/'+str(len(url_list)), filename_list[i])
-
-    try:
-        request = urllib.request.Request(url_list[i])
-        response = urllib.request.urlopen(request)
-        file = response.read()
-    except urllib.error.HTTPError:
-        nonTrouve += nonTrouve
-        print("ERROR FILE NOT FOUND")
-        continue
-
-    output = open(os.path.join(save_file_path_abs, "%s" % (filename_list[i])), "wb")
-    output.write(file)
-    output.close()
-
-print("%d files couldn't be found" % nonTrouve)
-print("%d files were saved" % (len(url_list)-nonTrouve))
+BSFG.selectSaveFolder()
+BSFG.saveAllFiles()
