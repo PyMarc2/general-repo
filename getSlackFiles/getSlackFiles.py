@@ -52,7 +52,7 @@ if not save_file_path:
 nonTrouve = 0
 
 for i in range(len(url_list)):
-    print(str(i+1)+'/'+str(len(url_list)))
+    print(str(i+1)+'/'+str(len(url_list)), filename_list[i])
 
     try:
         request = urllib.request.Request(url_list[i])
