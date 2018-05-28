@@ -24,6 +24,18 @@ class GetSlackFiles:
         self.flag = 1
         self.root = tk.Tk()
 
+    def getAllFiles(self):
+        self.selectFile2Parse()
+        self.openFile2Parse()
+
+        self.findURL()
+        self.findFilename()
+        self.findCategory()
+        self.findDate()
+
+        self.selectSaveFolder()
+        self.saveAllFiles()
+
     def selectFile2Parse(self):
         while self.flag == 1:
             self.confirm = input("Press <Enter> to select the file to parse")
@@ -91,14 +103,4 @@ class GetSlackFiles:
 
 
 BSFG = GetSlackFiles()  # BliqSlackFilesGetter
-
-BSFG.selectFile2Parse()
-BSFG.openFile2Parse()
-
-BSFG.findURL()
-BSFG.findFilename()
-BSFG.findCategory()
-BSFG.findDates()
-
-BSFG.selectSaveFolder()
-BSFG.saveAllFiles()
+BSFG.getAllFiles()
