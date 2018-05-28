@@ -68,4 +68,4 @@ for i in range(len(url_list)):
     output.close()
 
 print("%d files couldn't be found" % nonTrouve)
-print("%d files where saved" % (len(url_list)-nonTrouve))
+print("%d files were saved" % (len(url_list)-nonTrouve))
