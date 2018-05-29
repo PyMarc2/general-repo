@@ -66,13 +66,28 @@ class GetSlackFiles:
         for i in range(len(self.filename_list)):
             self.filename_list[i] = self.filename_list[i].replace("/download\\/", "")
             self.filename_list[i] = self.filename_list[i].replace("?", "")
+
+        print(self.filename_list)
         print(len(self.filename_list))
 
     def findCategory(self):
+        self.category_list = re.findall(r'''.+/#?\d{4}-\d{2}-\d{2}\.json#?.+/download''', self.url_file)
+        for i in range(len(self.category_list)):
+            self.category_list[i] = self.category_list[i].split("/")[0]
+
+        print(self.category_list)
+        print(len(self.category_list))
+
+    def generateCategory(self):
         pass
 
-    def findDates(self):
-        pass
+    def findDate(self):
+        self.dates_list = re.findall(r'''\d{4}-\d{2}-\d{2}\.json#?.+/download''', self.url_file)
+        for i in range(len(self.dates_list)):
+            self.dates_list[i] = self.dates_list[i].split(".")[0]
+
+        print(self.dates_list)
+        print(len(self.dates_list))
 
     def selectSaveFolder(self):
         print("Where do you want to save your %d files ?" % len(self.url_list))
