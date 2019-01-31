@@ -1,4 +1,4 @@
-# Apprentissage
+# general-repo
 Bunch of codes that I will use to either practice or do some tests. 
 You can look through those files and use the code as you please, please at least acknowledge my work and contribution.
 
